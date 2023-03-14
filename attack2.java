@@ -90,7 +90,8 @@ public class attack2 {
 	//contains Nc + 1 and Ns {{Nc+1}, Ns}
 	byte[] message = new byte [32];
 	inStream.read(message);
-	byte[] nonceReplyBytes = decAEScipher.doFinal(decAESsessionCipher.doFinal(message));
+	byte[] bigMessage = test.decAESsessionCipher.doFinal(message));
+	//first part of message is the encrypted Nc+1, can obtain server nonce now.
     }
 
 	
