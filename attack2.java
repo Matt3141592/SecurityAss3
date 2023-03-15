@@ -111,11 +111,9 @@ public class attack2 {
 	inStream.read(secret);
 	System.out.println(test.byteArrayToHexString(secret));
 	System.out.println("");
-	byte[] decsecret = test.decAESsessionCipher.doFinal(secret);
-	System.out.println(decsecret);
-	for (int i = 0; i < 428; i++)
-		System.out.print((char)decsecret[i]);
-	System.out.println("");
+	byte[] decsecret = test.decAESsessionCipher.doFinal(secret);	
+	String str1 = new String(decsecret);
+	System.out.println(str1);
 	
     }
 
