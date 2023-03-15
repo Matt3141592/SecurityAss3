@@ -32,7 +32,7 @@ import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 
-public class attack2 {
+public class attack3 {
     
     static int portNo = 11338;
     static String ipAddy = "127.0.0.1";
@@ -44,10 +44,17 @@ public class attack2 {
 	// thread to run the protocol over that connection and go 
 	// back to listening for new connections
 	Socket socket = new Socket(ipAddy, portNo);
+
+	byte[] keyBytes = new byte[16];
 	Scanner sc = new Scanner(System.in);
+	
 
 	DataOutputStream outStream = new DataOutputStream(socket.getOutputStream());
 	DataInputStream inStream = new DataInputStream(socket.getInputStream());
+
+	SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
+	Cipher decAEScipher = Cipher.getInstance("AES");			
+	decAEScipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
 	
 	//generating x and g^x
 	DHParameterSpec dhSpec = new DHParameterSpec(p,g);
@@ -66,56 +73,41 @@ public class attack2 {
 	int publicKeyLen = inStream.readInt();
     byte[] message1 = new byte[publicKeyLen];
     inStream.read(message1);
-    //System.out.println("Y "+byteArrayToHexString(message1));
     KeyFactory keyfactoryDH = KeyFactory.getInstance("DH");
     X509EncodedKeySpec x509Spec = new X509EncodedKeySpec(message1);
     PublicKey gToTheY = keyfactoryDH.generatePublic(x509Spec);
 
 	//calculate g^xy
-	attack2 test = new attack2();
+	attack3 test = new attack3();
 	test.calculateSessionKey(x, gToTheY);
 
-	//generate my nonce and encrypt with session cipher, then send to server
-	SecureRandom gen = new SecureRandom();
-    int Nonce = gen.nextInt();
-	byte[] NonceBytes = BigInteger.valueOf(Nonce).toByteArray();
+	//give server's nonce and encrypt with session cipher, then send to server
+	//SecureRandom gen = new SecureRandom();
+	String str = sc.next();
+    //int Nonce = sc.nextInt();
+	byte[] NonceBytes = Base64.getDecoder().decode(str); //the server's nonce
 	byte[] NonceBytesCT = test.encAESsessionCipher.doFinal(NonceBytes);
     outStream.write(NonceBytesCT);
-    System.out.println("Nonce: "+Nonce +" " +NonceBytes+" "+NonceBytesCT);
 
 	//receive step 4 from the server. Is encrypted with g^xy so can decrypt
 	//contains Nc + 1 and Ns {{Nc+1}, Ns}
 	byte[] message = new byte [32];
 	inStream.read(message);
 	byte[] bigMessage = test.decAESsessionCipher.doFinal(message);
-	System.out.println("Big: "+bigMessage);
 	//first part of message is the encrypted Nc+1, can obtain server nonce now.b
 	byte[] ncadd1 = Arrays.copyOfRange(bigMessage, 0, 16);
 	byte[] ns = Arrays.copyOfRange(bigMessage, 16, 20);
+	System.out.println("Here: "+new String(Base64.getEncoder().encode(ncadd1)));
 	int serverNonce = new BigInteger(ns).intValue();
-	
-	System.out.println(serverNonce);
-	NonceBytes = BigInteger.valueOf(Nonce+1).toByteArray();
-	System.out.println("Base64: "+new String(Base64.getEncoder().encode(ns)));
-
-	
-	//takes in server nonce plus one and sends to the server.
-	String str = sc.next();
-	byte[] nsadd1 = Base64.getDecoder().decode(str);
-	byte[] nsadd1ct = test.encAESsessionCipher.doFinal(nsadd1);
-	System.out.println(BigInteger.valueOf(serverNonce));
-	outStream.write(nsadd1ct);
+	//ns = BigInteger.valueOf(serverNonce+1).toByteArray();
+	//have ns+1 so can xor with encypted nc+1
+	//NonceBytes = BigInteger.valueOf(Nonce+1).toByteArray();
+	System.out.println(byteArrayToHexString(ns));
 	
 	//receive the secret message and decrypt
-	byte[] secret = new byte[432];
-	inStream.read(secret);
-	System.out.println(test.byteArrayToHexString(secret));
-	System.out.println("");
-	byte[] decsecret = test.decAESsessionCipher.doFinal(secret);
-	System.out.println(decsecret);
-	for (int i = 0; i < 428; i++)
-		System.out.print((char)decsecret[i]);
-	System.out.println("");
+	byte[] secret = new byte[208];
+	//byte[] decsecret = test.decAESsessionCipher.doFinal(secret);
+	//System.out.println(decsecret);
 	
     }
 
