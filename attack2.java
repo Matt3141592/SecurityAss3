@@ -78,6 +78,7 @@ public class attack2 {
 	//generate my nonce and encrypt with session cipher, then send to server
 	SecureRandom gen = new SecureRandom();
     int Nonce = gen.nextInt();
+	// int Nonce = <server nonce from first connection>;
 	byte[] NonceBytes = BigInteger.valueOf(Nonce).toByteArray();
 	byte[] NonceBytesCT = test.encAESsessionCipher.doFinal(NonceBytes);
     outStream.write(NonceBytesCT);
@@ -94,7 +95,7 @@ public class attack2 {
 	byte[] ns = Arrays.copyOfRange(bigMessage, 16, 20);
 	int serverNonce = new BigInteger(ns).intValue();
 	
-	System.out.println("Server nonce: "+serverNonce);
+	System.out.println("Server nonce (take this and input as client nonce in another connection): "+serverNonce);
 	NonceBytes = BigInteger.valueOf(Nonce+1).toByteArray();
 	System.out.println("Base64: "+new String(Base64.getEncoder().encode(ncadd1)));
 
