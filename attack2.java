@@ -94,12 +94,13 @@ public class attack2 {
 	byte[] ns = Arrays.copyOfRange(bigMessage, 16, 20);
 	int serverNonce = new BigInteger(ns).intValue();
 	
-	System.out.println(serverNonce);
+	System.out.println("Server nonce: "+serverNonce);
 	NonceBytes = BigInteger.valueOf(Nonce+1).toByteArray();
-	System.out.println("Base64: "+new String(Base64.getEncoder().encode(ns)));
+	System.out.println("Base64: "+new String(Base64.getEncoder().encode(ncadd1)));
 
 	
 	//takes in server nonce plus one and sends to the server.
+	System.out.print("Enter {Ns+1}_KCS: ")
 	String str = sc.next();
 	byte[] nsadd1 = Base64.getDecoder().decode(str);
 	byte[] nsadd1ct = test.encAESsessionCipher.doFinal(nsadd1);
