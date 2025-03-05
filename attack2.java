@@ -100,7 +100,7 @@ public class attack2 {
 
 	
 	//takes in server nonce plus one and sends to the server.
-	System.out.print("Enter {Ns+1}_KCS: ")
+	System.out.print("Enter {Ns+1}_KCS: ");
 	String str = sc.next();
 	byte[] nsadd1 = Base64.getDecoder().decode(str);
 	byte[] nsadd1ct = test.encAESsessionCipher.doFinal(nsadd1);
